@@ -1,4 +1,4 @@
-require 'oyster'
+require 'oyster.rb'
 
 describe Oystercard do
     it 'Equals 0' do
@@ -25,6 +25,13 @@ describe Oystercard do
         max_balance = Oystercard::MAX_BALANCE
         subject.top_up max_balance
         expect{ subject.top_up 1 }.to raise_error 'Your card has hit the limit!'
+      end
+    end
+
+    describe "touch_in" do
+      it "should touch in and start journey" do
+        subject.touch_in
+        expect(subject.in_journey?).to eq true
       end
     end
 end
