@@ -1,46 +1,44 @@
-require 'oyster.rb'
+require 'oyster'
 
 describe Oystercard do
     it 'Equals 0' do
       expect(subject.balance).to eq 0
     end
 
-    describe 'deduct' do
-      it { is_expected.to respond_to(:deduct).with(1).argument }
-
-      it 'deducts an amount from the balance' do
-        subject.top_up(20)
-        expect{ subject.deduct 3}.to change{ subject.balance }.by -3
-      end
-    end
-
-    describe '#top_up' do
+    context '#top_up' do
       it { is_expected.to respond_to(:top_up).with(1).argument }
-    
+
       it 'can top up balance' do
         expect{ subject.top_up 1 }.to change{ subject.balance }.by 1
       end
-
-      it "raises error when trying to top up when card hits limit" do
-        max_balance = Oystercard::MAX_BALANCE
-        subject.top_up max_balance
-        expect{ subject.top_up 1 }.to raise_error 'Your card has hit the limit!'
-      end
     end
 
-    describe "touch_in" do
-      it "should touch in and start journey" do
-        subject.touch_in
-        expect(subject.in_journey?).to eq true
+    context '#deduct_fare' do
+      it { is_expected.to respond_to(:deduct_fare).with(1).argument }
+
+      it 'deducts fare from the balance' do
+        expect{ subject.deduct_fare(1) }.to change{ subject.balance }.by (-1)
       end
+    end  
+
+    it 'raises error when trying to top up when card hits limit' do
+      subject.top_up(Oystercard::MAX_BALANCE)
+      expect{ subject.top_up(1) }.to raise_error 'Your card has hit the limit!'
+    end
+    
+    it '#touch_in' do
+      subject.top_up(Oystercard::MAX_BALANCE)
+      subject.touch_in
+      expect(subject.in_journey?).to eq true
     end
 
-    describe "touch_out" do
-      it "should end the journey" do
-        subject.touch_out
-        expect(subject.in_journey?).to eq false
-      end
+    it 'will not touch in if below minimum balance' do
+      subject.deduct_fare(Oystercard::DEFAULT_BALANCE)
+      expect{ subject.touch_in }.to raise_error 'Insufficient balance to touch in'
+    end
+    
+    it '#touch_out' do
+      subject.touch_out
+      expect(subject.in_journey?).to eq false
     end
 end
-
-
